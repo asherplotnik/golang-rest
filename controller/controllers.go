@@ -5,7 +5,7 @@ import (
 	"errors"
 	"github.com/asherplotnik/golang-rest/model"
 	"github.com/asherplotnik/golang-rest/service"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"github.com/gin-gonic/gin"
 )
@@ -65,10 +65,11 @@ func GetTodo(context *gin.Context) {
 
 	webResponse, _ := makeWebRequest(result.Item)
 	if webResponse != nil {
+		context.IndentedJSON(http.StatusOK, result)
+		context.IndentedJSON(http.StatusOK,toJson("{\"item\":\" details \"}"))
 		context.IndentedJSON(http.StatusOK, webResponse)
 		return
 	}
-
 	context.IndentedJSON(http.StatusOK, result)
 
 }
@@ -116,7 +117,7 @@ func makeWebRequest(url string) (interface{}, error) {
 
 	defer response.Body.Close()
 
-	bodyBytes, err := ioutil.ReadAll(response.Body)
+	bodyBytes, err := io.ReadAll(response.Body)
 	if err != nil {
 		return nil, errors.New("error read response")
 	}
@@ -127,4 +128,10 @@ func makeWebRequest(url string) (interface{}, error) {
         return nil, errors.New("error Unmarshal response")
     }
 	return iot, nil
+}
+
+func toJson(jsonString string) interface{} {
+	var jsonObj interface{}
+	json.Unmarshal([]byte(jsonString), &jsonObj)
+	return jsonObj
 }
